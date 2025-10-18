@@ -1,0 +1,389 @@
+.debate-stage {
+  min-height: 100%;
+  padding: 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.stage-header {
+  margin-bottom: 40px;
+}
+
+.round-container {
+  margin-bottom: 32px;
+}
+
+.round-toggle {
+  width: 100%;
+  padding: 16px 24px;
+  background: #171717;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.round-toggle:hover {
+  background: #1f1f1f;
+  border-color: #3a3a3a;
+}
+
+.round-label {
+  color: #e5e5e5;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  color: #808080;
+}
+
+.round-label-static {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 24px;
+  padding-left: 4px;
+}
+
+.dilemma-card {
+  background: #171717;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.dilemma-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+
+.options-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.option-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.option-badge {
+  background: #2a2a2a;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.option-item p {
+  color: #b0b0b0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.option-divider {
+  width: 1px;
+  height: 60px;
+  background: #2a2a2a;
+}
+
+.agents-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.agent-panel {
+  background: #171717;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 32px;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+}
+
+.agent-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.agent-panel.active {
+  border-color: #505050;
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.08);
+  transform: translateY(-4px);
+}
+
+.agent-panel.thinking {
+  border-color: #3a3a3a;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+}
+
+.agent-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.agent-icon {
+  font-size: 2.5rem;
+  color: white;
+  font-weight: 300;
+  z-index: 1;
+}
+
+.agent-details {
+  margin-bottom: 24px;
+}
+
+.agent-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.agent-role {
+  font-size: 0.9rem;
+  color: #808080;
+  margin-bottom: 12px;
+}
+
+.agent-stance {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #0a0a0a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #b0b0b0;
+}
+
+.stance-value {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.thinking-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
+
+.thinking-pulse {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 auto 16px;
+  animation: thinking-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes thinking-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+.thinking-label {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.agent-speech {
+  margin-top: 16px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.speech-bubble {
+  background: #0d0d0d;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #2a2a2a;
+}
+
+.speech-bubble p {
+  color: #e5e5e5;
+  line-height: 1.7;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.stage-controls {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.stage-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.01em;
+}
+
+.stage-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background: #ffffff;
+  color: #0a0a0a;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #e5e5e5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+}
+
+.secondary-btn {
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid #3a3a3a;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: #3a3a3a;
+  transform: translateY(-2px);
+}
+
+.ghost-btn {
+  background: transparent;
+  color: #808080;
+  border: 1px solid #2a2a2a;
+}
+
+.ghost-btn:hover:not(:disabled) {
+  background: #1a1a1a;
+  color: #b0b0b0;
+  border-color: #3a3a3a;
+}
+
+@media (max-width: 1200px) {
+  .agents-panel {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .agent-panel {
+    min-height: auto;
+  }
+
+  .options-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .option-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .debate-stage {
+    padding: 20px 16px;
+  }
+
+  .dilemma-card {
+    padding: 24px;
+  }
+
+  .dilemma-title {
+    font-size: 1.4rem;
+  }
+
+  .stage-controls {
+    flex-direction: column;
+  }
+
+  .stage-btn {
+    width: 100%;
+  }
+}

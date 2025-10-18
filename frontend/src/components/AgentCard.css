@@ -1,0 +1,87 @@
+.agent-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.agent-card.deon {
+  border-left-color: #3182ce;
+}
+
+.agent-card.conse {
+  border-left-color: #38a169;
+}
+
+.agent-card.virtue {
+  border-left-color: #d69e2e;
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.agent-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.agent-card.deon .agent-name {
+  color: #3182ce;
+}
+
+.agent-card.conse .agent-name {
+  color: #38a169;
+}
+
+.agent-card.virtue .agent-name {
+  color: #d69e2e;
+}
+
+.stance-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.stance-a {
+  background: #bee3f8;
+  color: #2c5282;
+}
+
+.stance-b {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.agent-argument {
+  color: #555;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .agent-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

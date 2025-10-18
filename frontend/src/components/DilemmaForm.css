@@ -1,0 +1,106 @@
+.card {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  border: none;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.dilemma-form h2 {
+  margin-bottom: 40px;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #b0b0b0;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: #171717;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #e5e5e5;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #505050;
+  background: #1a1a1a;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #505050;
+}
+
+.btn {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 5px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #ffffff;
+  color: #0a0a0a;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #e5e5e5;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary {
+  background: #2a2a2a;
+  color: #ffffff;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid #2a2a2a;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+}
