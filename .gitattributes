@@ -1,27 +1,32 @@
 # .gitattributes - Fix GitHub language detection
 
-# Exclude virtual environment and dependencies from language stats
-.venv/** linguist-vendored
+# Exclude dependencies and generated files
 **/node_modules/** linguist-vendored
+**/.venv/** linguist-vendored
 **/venv/** linguist-vendored
 **/env/** linguist-vendored
+**/__pycache__/** linguist-vendored
+**/dist/** linguist-vendored
+**/build/** linguist-vendored
 
-# Explicitly mark frontend files
-frontend/** linguist-detectable=true
+# Force detection of frontend code
+frontend/src/*.js linguist-language=JavaScript
+frontend/src/*.jsx linguist-language=JavaScript
+frontend/src/*.ts linguist-language=TypeScript  
+frontend/src/*.tsx linguist-language=TypeScript
+frontend/src/*.css linguist-language=CSS
+frontend/*.html linguist-language=HTML
 frontend/src/**/*.js linguist-language=JavaScript
 frontend/src/**/*.jsx linguist-language=JavaScript
-frontend/src/**/*.ts linguist-language=TypeScript
-frontend/src/**/*.tsx linguist-language=TypeScript
-frontend/src/**/*.css linguist-language=CSS
-frontend/src/**/*.html linguist-language=HTML
 
-# Explicitly mark backend files
-backend/**/*.py linguist-language=Python
+# Backend files
+backend/*.py linguist-language=Python
 
-# Mark documentation
+# Documentation (exclude from stats)
 *.md linguist-documentation
 docs/** linguist-documentation
+README* linguist-documentation
 
-# Exclude test files from main language stats (optional)
-**/*test*.py linguist-vendored=false
-**/*test*.js linguist-vendored=false
+# Test files (exclude from main stats)
+*test*.py linguist-vendored
+*test*.js linguist-vendored
