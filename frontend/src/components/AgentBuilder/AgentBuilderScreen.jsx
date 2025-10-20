@@ -118,10 +118,11 @@ function AgentBuilderScreen({ onClose, onAgentCreated }) {
     setErrors({}); // Clear previous errors
     
     try {
+      // ALWAYS send the original description - backend will enhance it
       const payload = {
         name: formData.name.trim(),
         avatar: formData.avatar,
-        description: useEnhanced && enhancement ? enhancement.enhanced_prompt : formData.description.trim()
+        description: formData.description.trim()
       };
 
       console.log('Creating agent with payload:', payload);
@@ -469,21 +470,11 @@ function AgentBuilderScreen({ onClose, onAgentCreated }) {
                 <div className="creation-options">
                   <button 
                     className="create-btn primary"
-                    onClick={() => createAgent(true)}
+                    onClick={() => createAgent()}
                     disabled={isProcessing}
                   >
                     {isProcessing ? 'Creating Agent...' : 'Create Agent'}
                   </button>
-                  
-                  {enhancement && (
-                    <button 
-                      className="create-btn secondary"
-                      onClick={() => createAgent(false)}
-                      disabled={isProcessing}
-                    >
-                      Use Original Description
-                    </button>
-                  )}
                 </div>
 
                 {errors.creation && (
