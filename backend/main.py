@@ -173,6 +173,15 @@ class Transcript(BaseModel):
     dilemma: Dilemma
     turns: List[AgentTurn]
 
+# Import custom agent models
+from models.custom_agent import CustomAgent, AgentCreationRequest, AgentUpdateRequest, AgentRating
+from services.agent_service import AgentService
+from services.enhancement_service import EnhancementService
+
+# Initialize services
+agent_service = AgentService()
+enhancement_service = EnhancementService()
+
 # -------------------- APP CONFIG --------------------
 app = FastAPI(title="MirrorMinds API")
 
@@ -283,17 +292,9 @@ def openings(d: Dilemma):
 def single_agent(agent_name: str, d: Dilemma):
     base = mk_base(d)
     
-    agents = {
-        "deon": (DEON_SYS, "Deon"),
-        "conse": (CONSE_SYS, "Conse"),
-        "virtue": (VIRTUE_SYS, "Virtue")
-    }
-    
-    agent_key = agent_name.lower()
-    if agent_key not in agents:
-        raise HTTPException(status_code=400, detail="Invalid agent name")
-    
-    sys_prompt, role = agents[agent_key]
+    # Get system prompt for any agent (default or custom)
+    sys_prompt = get_agent_system_prompt(agent_name)
+    role = get_agent_display_name(agent_name)
     
     try:
         raw = call_ollama(sys_prompt, base + "\n" + OPENING_INSTRUCT, num_predict=300, temp=0.65)
@@ -319,7 +320,10 @@ def continue_round(t: Transcript):
     base = mk_base(t.dilemma)
     latest = latest_by_agent(t.turns)
 
-    def respond(role: str, sys: str):
+    def respond(role: str, sys: str = None):
+        # Get system prompt if not provided
+        if sys is None:
+            sys = get_agent_system_prompt(role)
         # Build explicit opponent choices (cannot be self)
         opponents = [name for name in ["Deon", "Conse", "Virtue"] if name in latest and name != role]
         
@@ -382,12 +386,207 @@ def continue_round(t: Transcript):
         final_stance = prev if stance == "SAME" else stance
         return AgentTurn(agent=role, stance=final_stance, argument=arg)
 
-    return {"turns": [respond("Deon", DEON_SYS).dict(),
-                      respond("Conse", CONSE_SYS).dict(),
-                      respond("Virtue", VIRTUE_SYS).dict()]}
+    # Get unique agent names from the transcript
+    agent_names = list(set(turn.agent for turn in t.turns))
+    
+    # If we have the default 3 agents, use them
+    if len(agent_names) == 3 and all(name in ["Deon", "Conse", "Virtue"] for name in agent_names):
+        return {"turns": [respond("Deon").dict(),
+                          respond("Conse").dict(),
+                          respond("Virtue").dict()]}
+    else:
+        # Use the agents from the transcript
+        return {"turns": [respond(agent_name).dict() for agent_name in agent_names]}
 
 @app.post("/judge")
 def judge(t: Transcript):
     judge_input = {"dilemma": t.dilemma.dict(), "transcript": [x.dict() for x in t.turns]}
     raw = call_ollama(JUDGE_SYS, json.dumps(judge_input), num_predict=280, temp=0.25)
     return clamp_json(raw, {"scores":{}, "final_recommendation":"A","confidence":50,"verdict":"—"})
+
+# -------------------- CUSTOM AGENT ENDPOINTS --------------------
+
+@app.post("/api/agents/create")
+def create_custom_agent(request: AgentCreationRequest):
+    """Create a new custom agent with AI enhancement"""
+    try:
+        # Enhance the description
+        enhancement = enhancement_service.enhance_agent_description(request.description)
+        
+        # Generate system prompt
+        system_prompt = enhancement_service.generate_system_prompt(
+            enhancement.enhanced_prompt, 
+            request.name
+        )
+        
+        # Create the agent
+        agent = agent_service.create_agent(
+            request, 
+            enhancement.enhanced_prompt, 
+            system_prompt
+        )
+        
+        return {
+            "agent": agent.dict(),
+            "enhancement": enhancement.dict()
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create agent: {str(e)}")
+
+@app.get("/api/agents")
+def list_agents(public_only: bool = True, search: Optional[str] = None, limit: int = 50):
+    """List all available agents"""
+    try:
+        agents = agent_service.list_agents(public_only, search, limit)
+        return {"agents": [agent.dict() for agent in agents]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list agents: {str(e)}")
+
+@app.get("/api/agents/all")
+def get_all_available_agents():
+    """Get all agents (default + custom) in unified format"""
+    try:
+        agents = agent_service.get_all_available_agents()
+        return {"agents": agents}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get agents: {str(e)}")
+
+@app.get("/api/agents/{agent_id}")
+def get_agent(agent_id: str):
+    """Get a specific agent by ID"""
+    try:
+        agent = agent_service.get_agent(agent_id)
+        if not agent:
+            raise HTTPException(status_code=404, detail="Agent not found")
+        return {"agent": agent.dict()}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get agent: {str(e)}")
+
+@app.put("/api/agents/{agent_id}")
+def update_agent(agent_id: str, request: AgentUpdateRequest):
+    """Update an existing agent"""
+    try:
+        enhanced_prompt = None
+        system_prompt = None
+        
+        # If description is being updated, re-enhance it
+        if request.description is not None:
+            enhancement = enhancement_service.enhance_agent_description(request.description)
+            enhanced_prompt = enhancement.enhanced_prompt
+            system_prompt = enhancement_service.generate_system_prompt(
+                enhanced_prompt, 
+                request.name or "Agent"
+            )
+        
+        agent = agent_service.update_agent(agent_id, request, enhanced_prompt, system_prompt)
+        if not agent:
+            raise HTTPException(status_code=404, detail="Agent not found")
+        
+        return {"agent": agent.dict()}
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update agent: {str(e)}")
+
+@app.delete("/api/agents/{agent_id}")
+def delete_agent(agent_id: str):
+    """Delete an agent"""
+    try:
+        success = agent_service.delete_agent(agent_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Agent not found")
+        return {"message": "Agent deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete agent: {str(e)}")
+
+@app.post("/api/enhance")
+def enhance_description(request: dict):
+    """Enhance an agent description"""
+    try:
+        description = request.get("description", "")
+        if not description or len(description) < 50:
+            raise HTTPException(status_code=400, detail="Description must be at least 50 characters")
+        
+        enhancement = enhancement_service.enhance_agent_description(description)
+        return enhancement.dict()
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to enhance description: {str(e)}")
+
+@app.post("/api/agents/{agent_id}/regenerate")
+def regenerate_agent_prompt(agent_id: str):
+    """Regenerate the enhanced prompt for an existing agent"""
+    try:
+        agent = agent_service.get_agent(agent_id)
+        if not agent:
+            raise HTTPException(status_code=404, detail="Agent not found")
+        
+        # Re-enhance the original description
+        enhancement = enhancement_service.enhance_agent_description(agent.description)
+        system_prompt = enhancement_service.generate_system_prompt(
+            enhancement.enhanced_prompt, 
+            agent.name
+        )
+        
+        # Update the agent
+        update_request = AgentUpdateRequest()
+        updated_agent = agent_service.update_agent(
+            agent_id, 
+            update_request, 
+            enhancement.enhanced_prompt, 
+            system_prompt
+        )
+        
+        return {
+            "agent": updated_agent.dict(),
+            "enhancement": enhancement.dict()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to regenerate agent: {str(e)}")
+
+# -------------------- CUSTOM AGENT DEBATE INTEGRATION --------------------
+
+def get_agent_system_prompt(agent_name: str) -> str:
+    """Get system prompt for any agent (default or custom)"""
+    # Check if it's a default agent
+    if agent_name.lower() == "deon":
+        return DEON_SYS
+    elif agent_name.lower() == "conse":
+        return CONSE_SYS
+    elif agent_name.lower() == "virtue":
+        return VIRTUE_SYS
+    else:
+        # Try to find custom agent
+        agent = agent_service.get_agent(agent_name)
+        if agent:
+            # Increment usage count
+            agent_service.increment_usage(agent_name)
+            return agent.system_prompt
+        else:
+            # Fallback to default if not found
+            return DEON_SYS
+
+def get_agent_display_name(agent_identifier: str) -> str:
+    """Get display name for any agent"""
+    # Check if it's a default agent
+    if agent_identifier.lower() in ["deon", "conse", "virtue"]:
+        return agent_identifier.capitalize()
+    else:
+        # Try to find custom agent
+        agent = agent_service.get_agent(agent_identifier)
+        return agent.name if agent else agent_identifier
