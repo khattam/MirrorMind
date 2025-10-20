@@ -3,12 +3,13 @@ import DilemmaForm from './components/DilemmaForm';
 import DebateView from './components/DebateView';
 import VerdictView from './components/VerdictView';
 import Sidebar from './components/Sidebar';
+import AgentBuilderScreen from './components/AgentBuilder/AgentBuilderScreen';
 import './App.css';
 
 const API_URL = 'http://127.0.0.1:8000';
 
 function App() {
-  const [stage, setStage] = useState('form'); // 'form', 'debate', 'verdict'
+  const [stage, setStage] = useState('form'); // 'form', 'debate', 'verdict', 'agent-builder'
   const [dilemma, setDilemma] = useState(null);
   const [transcript, setTranscript] = useState(null);
   const [verdict, setVerdict] = useState(null);
@@ -149,17 +150,38 @@ function App() {
     setDebateHistory(prev => prev.filter(item => item.id !== id));
   };
 
+  const openAgentBuilder = () => {
+    setStage('agent-builder');
+  };
+
+  const closeAgentBuilder = () => {
+    setStage('form');
+  };
+
   return (
     <div className="app">
-      <Sidebar 
-        stage={stage}
-        debateHistory={debateHistory}
-        onNewDebate={handleReset}
-        onViewHistory={viewHistoryItem}
-        onDeleteHistory={deleteHistoryItem}
-      />
+      {stage !== 'agent-builder' && (
+        <Sidebar 
+          stage={stage}
+          debateHistory={debateHistory}
+          onNewDebate={handleReset}
+          onViewHistory={viewHistoryItem}
+          onDeleteHistory={deleteHistoryItem}
+          onOpenAgentBuilder={openAgentBuilder}
+        />
+      )}
 
-      <div className="main-area">
+      {stage === 'agent-builder' ? (
+        <AgentBuilderScreen 
+          onClose={closeAgentBuilder}
+          onAgentCreated={(agent) => {
+            // Handle agent creation success
+            console.log('Agent created:', agent);
+            closeAgentBuilder();
+          }}
+        />
+      ) : (
+        <div className="main-area">
         <header className="header">
           <div>
             <h1>Ethical Debate Simulator</h1>
@@ -245,7 +267,8 @@ function App() {
             </div>
           )}
         </main>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

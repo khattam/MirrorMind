@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import AgentBuilderForm from './AgentBuilder/AgentBuilderForm';
 import './Sidebar.css';
 
-function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHistory }) {
+function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHistory, onOpenAgentBuilder }) {
   const [activeTab, setActiveTab] = useState('history');
   const [expandedAgents, setExpandedAgents] = useState(new Set());
   const [customAgents, setCustomAgents] = useState([]);
@@ -64,13 +63,12 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
           >
             Agents
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'builder' ? 'active' : ''}`}
-            onClick={() => setActiveTab('builder')}
-          >
-            Builder
-          </button>
         </div>
+
+        <button className="create-agent-btn" onClick={onOpenAgentBuilder}>
+          <span className="create-icon">✨</span>
+          Create Custom Agent
+        </button>
 
         {activeTab === 'history' && (
           <div className="history-section">
@@ -174,17 +172,7 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
           </div>
         )}
 
-        {activeTab === 'builder' && (
-          <div className="builder-section">
-            <AgentBuilderForm 
-              onAgentCreated={(agent) => {
-                setCustomAgents(prev => [agent, ...prev]);
-                // Optionally switch to agents tab to show the new agent
-                setActiveTab('agents');
-              }}
-            />
-          </div>
-        )}
+
       </div>
     </aside>
   );
