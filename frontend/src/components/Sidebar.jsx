@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import AgentBuilderForm from './AgentBuilder/AgentBuilderForm';
 import './Sidebar.css';
 
 function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHistory }) {
   const [activeTab, setActiveTab] = useState('history');
   const [expandedAgents, setExpandedAgents] = useState(new Set());
+  const [customAgents, setCustomAgents] = useState([]);
 
   const agentInfo = {
     Deon: {
@@ -62,6 +64,12 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
           >
             Agents
           </button>
+          <button 
+            className={`tab-btn ${activeTab === 'builder' ? 'active' : ''}`}
+            onClick={() => setActiveTab('builder')}
+          >
+            Builder
+          </button>
         </div>
 
         {activeTab === 'history' && (
@@ -102,40 +110,79 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
 
         {activeTab === 'agents' && (
           <div className="agents-section">
-            {Object.values(agentInfo).map((agent) => (
-              <div key={agent.name} className="agent-info-card">
-                <div 
-                  className="agent-info-header clickable"
-                  onClick={() => {
-                    const newExpanded = new Set(expandedAgents);
-                    if (newExpanded.has(agent.name)) {
-                      newExpanded.delete(agent.name);
-                    } else {
-                      newExpanded.add(agent.name);
-                    }
-                    setExpandedAgents(newExpanded);
-                  }}
-                >
-                  <div className="agent-info-avatar" style={{ background: agent.gradient }}>
-                    <span className="agent-info-icon">{agent.icon}</span>
+            <div className="agents-subsection">
+              <h3 className="subsection-title">Default Agents</h3>
+              {Object.values(agentInfo).map((agent) => (
+                <div key={agent.name} className="agent-info-card">
+                  <div 
+                    className="agent-info-header clickable"
+                    onClick={() => {
+                      const newExpanded = new Set(expandedAgents);
+                      if (newExpanded.has(agent.name)) {
+                        newExpanded.delete(agent.name);
+                      } else {
+                        newExpanded.add(agent.name);
+                      }
+                      setExpandedAgents(newExpanded);
+                    }}
+                  >
+                    <div className="agent-info-avatar" style={{ background: agent.gradient }}>
+                      <span className="agent-info-icon">{agent.icon}</span>
+                    </div>
+                    <div className="agent-header-text">
+                      <h4 className="agent-info-name">{agent.name}</h4>
+                      <p className="agent-info-role">{agent.role}</p>
+                    </div>
+                    <span className="expand-icon">{expandedAgents.has(agent.name) ? '−' : '+'}</span>
                   </div>
-                  <div className="agent-header-text">
-                    <h4 className="agent-info-name">{agent.name}</h4>
-                    <p className="agent-info-role">{agent.role}</p>
-                  </div>
-                  <span className="expand-icon">{expandedAgents.has(agent.name) ? '−' : '+'}</span>
+                  
+                  {expandedAgents.has(agent.name) && (
+                    <div className="agent-info-details">
+                      <p className="agent-info-description">{agent.description}</p>
+                      <div className="agent-info-philosophy">
+                        <strong>Core Belief:</strong> {agent.philosophy}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
-                {expandedAgents.has(agent.name) && (
-                  <div className="agent-info-details">
-                    <p className="agent-info-description">{agent.description}</p>
-                    <div className="agent-info-philosophy">
-                      <strong>Core Belief:</strong> {agent.philosophy}
+              ))}
+            </div>
+
+            {customAgents.length > 0 && (
+              <div className="agents-subsection">
+                <h3 className="subsection-title">Custom Agents</h3>
+                {customAgents.map((agent) => (
+                  <div key={agent.id} className="agent-info-card custom">
+                    <div className="agent-info-header">
+                      <div className="agent-info-avatar custom">
+                        <span className="agent-info-icon">{agent.avatar}</span>
+                      </div>
+                      <div className="agent-header-text">
+                        <h4 className="agent-info-name">{agent.name}</h4>
+                        <p className="agent-info-role">Custom Agent</p>
+                        {agent.average_rating > 0 && (
+                          <div className="agent-rating">
+                            ⭐ {agent.average_rating.toFixed(1)} ({agent.rating_count})
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            )}
+          </div>
+        )}
+
+        {activeTab === 'builder' && (
+          <div className="builder-section">
+            <AgentBuilderForm 
+              onAgentCreated={(agent) => {
+                setCustomAgents(prev => [agent, ...prev]);
+                // Optionally switch to agents tab to show the new agent
+                setActiveTab('agents');
+              }}
+            />
           </div>
         )}
       </div>

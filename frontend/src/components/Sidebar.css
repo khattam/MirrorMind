@@ -302,3 +302,74 @@
 .agent-info-philosophy strong {
   color: #b0b0b0;
 }
+/* Bu
+ilder Section */
+.builder-section {
+  padding: 0;
+}
+
+.builder-section .agent-builder-form {
+  margin: 0;
+  padding: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.builder-section .form-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+}
+
+.builder-section .form-header h2 {
+  font-size: 18px;
+}
+
+/* Agent Subsections */
+.agents-subsection {
+  margin-bottom: 24px;
+}
+
+.subsection-title {
+  color: #888;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+  padding: 0 16px;
+}
+
+.agent-info-card.custom {
+  border-left: 3px solid #667eea;
+}
+
+.agent-info-avatar.custom {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.agent-rating {
+  font-size: 11px;
+  color: #ffd700;
+  margin-top: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid #333;
+  }
+  
+  .sidebar-content {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .builder-section .agent-builder-form {
+    padding: 12px;
+  }
+}
