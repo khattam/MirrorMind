@@ -64,11 +64,12 @@ function AgentBuilderScreen({ onClose, onAgentCreated }) {
     if (!validateStep(currentStep)) return;
     
     if (currentStep === 2) {
-      // Trigger enhancement when moving from step 2 to 3
+      // Show loading state and trigger enhancement when moving from step 2 to 3
+      setCurrentStep(3); // Move to step 3 first to show loading
       await enhanceDescription();
+    } else {
+      setCurrentStep(prev => Math.min(prev + 1, steps.length));
     }
-    
-    setCurrentStep(prev => Math.min(prev + 1, steps.length));
   };
 
   const prevStep = () => {
@@ -77,20 +78,36 @@ function AgentBuilderScreen({ onClose, onAgentCreated }) {
 
   const enhanceDescription = async () => {
     setIsProcessing(true);
+    setErrors({}); // Clear previous errors
+    
     try {
+      console.log('Enhancing description:', formData.description);
+      
       const response = await fetch(`${API_URL}/api/enhance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: formData.description })
+        body: JSON.stringify({ description: formData.description.trim() })
       });
       
-      if (!response.ok) throw new Error('Enhancement failed');
+      if (!response.ok) {
+        let errorMessage = 'Enhancement failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch (parseError) {
+          console.error('Error parsing enhancement error:', parseError);
+        }
+        throw new Error(errorMessage);
+      }
       
       const result = await response.json();
+      console.log('Enhancement successful:', result);
       setEnhancement(result);
     } catch (error) {
       console.error('Enhancement error:', error);
-      setErrors({ enhancement: 'Failed to enhance description. You can still proceed.' });
+      setErrors({ enhancement: `Enhancement failed: ${error.message}. You can still proceed with the original description.` });
+      // Still allow proceeding without enhancement
+      setEnhancement(null);
     } finally {
       setIsProcessing(false);
     }
@@ -98,23 +115,45 @@ function AgentBuilderScreen({ onClose, onAgentCreated }) {
 
   const createAgent = async (useEnhanced = true) => {
     setIsProcessing(true);
+    setErrors({}); // Clear previous errors
+    
     try {
+      const payload = {
+        name: formData.name.trim(),
+        avatar: formData.avatar,
+        description: useEnhanced && enhancement ? enhancement.enhanced_prompt : formData.description.trim()
+      };
+
+      console.log('Creating agent with payload:', payload);
+
       const response = await fetch(`${API_URL}/api/agents/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          avatar: formData.avatar,
-          description: useEnhanced && enhancement ? enhancement.enhanced_prompt : formData.description
-        })
+        body: JSON.stringify(payload)
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create agent');
+        let errorMessage = 'Failed to create agent';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+          
+          // Handle validation errors specifically
+          if (response.status === 422) {
+            if (typeof errorData.detail === 'object' && errorData.detail.length > 0) {
+              errorMessage = errorData.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ');
+            } else {
+              errorMessage = 'Validation error: Please check your input and try again';
+            }
+          }
+        } catch (parseError) {
+          console.error('Error parsing error response:', parseError);
+        }
+        throw new Error(errorMessage);
       }
       
       const result = await response.json();
+      console.log('Agent created successfully:', result);
       onAgentCreated && onAgentCreated(result.agent);
       onClose();
     } catch (error) {
@@ -305,8 +344,22 @@ function AgentBuilderScreen({ onClose, onAgentCreated }) {
                   <div className="processing-animation">
                     <div className="processing-spinner"></div>
                   </div>
-                  <h3>Enhancing your agent...</h3>
-                  <p>Our AI is analyzing and improving your description</p>
+                  <h3>🧠 Refining Agent Persona...</h3>
+                  <div className="processing-steps">
+                    <div className="processing-step active">
+                      <div className="step-icon">🔍</div>
+                      <span>Analyzing personality traits</span>
+                    </div>
+                    <div className="processing-step active">
+                      <div className="step-icon">⚡</div>
+                      <span>Enhancing decision-making framework</span>
+                    </div>
+                    <div className="processing-step active">
+                      <div className="step-icon">✨</div>
+                      <span>Optimizing ethical reasoning</span>
+                    </div>
+                  </div>
+                  <p className="processing-subtitle">This usually takes 10-15 seconds...</p>
                 </div>
               ) : enhancement ? (
                 <div className="enhancement-results">
