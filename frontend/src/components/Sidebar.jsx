@@ -1,10 +1,39 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Sidebar.css';
 
 function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHistory, onOpenAgentBuilder }) {
   const [activeTab, setActiveTab] = useState('history');
   const [expandedAgents, setExpandedAgents] = useState(new Set());
   const [customAgents, setCustomAgents] = useState([]);
+
+  const API_URL = 'http://127.0.0.1:8000';
+
+  // Load custom agents when component mounts or when switching to agents tab
+  const loadCustomAgents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/agents`);
+      if (response.ok) {
+        const data = await response.json();
+        setCustomAgents(data.agents || []);
+      }
+    } catch (error) {
+      console.error('Failed to load custom agents:', error);
+    }
+  };
+
+  // Load agents when component mounts or agents tab is selected
+  useEffect(() => {
+    if (activeTab === 'agents') {
+      loadCustomAgents();
+    }
+  }, [activeTab]);
+
+  // Also load when stage changes (in case an agent was just created)
+  useEffect(() => {
+    if (activeTab === 'agents') {
+      loadCustomAgents();
+    }
+  }, [stage]);
 
   const agentInfo = {
     Deon: {

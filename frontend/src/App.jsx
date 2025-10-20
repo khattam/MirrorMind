@@ -178,6 +178,8 @@ function App() {
             // Handle agent creation success
             console.log('Agent created:', agent);
             closeAgentBuilder();
+            // Force a re-render to refresh sidebar
+            setStage('form');
           }}
         />
       ) : (
