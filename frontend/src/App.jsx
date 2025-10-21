@@ -19,7 +19,7 @@ function App() {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
   const [historyViewTab, setHistoryViewTab] = useState('debate');
 
-  const handleStartDebate = async (dilemmaData) => {
+  const handleStartDebate = async (dilemmaData, selectedAgentIds = ['deon', 'conse', 'virtue']) => {
     setDilemma(dilemmaData);
     setTranscript({
       dilemma: dilemmaData,
@@ -28,15 +28,28 @@ function App() {
     setRoundCount(0);
     setStage('debate');
 
-    // Fetch agents one by one
-    const agents = ['Deon', 'Conse', 'Virtue'];
+    // Convert agent IDs to proper names for the API
+    const agentNames = selectedAgentIds.map(id => {
+      // Handle default agents
+      if (id === 'deon') return 'Deon';
+      if (id === 'conse') return 'Conse'; 
+      if (id === 'virtue') return 'Virtue';
+      // For custom agents, use the ID directly
+      return id;
+    });
+
     const turns = [];
 
-    for (const agent of agents) {
+    for (const agent of agentNames) {
       setCurrentThinkingAgent(agent);
       
       try {
-        const response = await fetch(`${API_URL}/agent/${agent.toLowerCase()}`, {
+        // For custom agents, use the ID directly; for default agents, use lowercase
+        const agentEndpoint = ['Deon', 'Conse', 'Virtue'].includes(agent) 
+          ? agent.toLowerCase() 
+          : agent;
+        
+        const response = await fetch(`${API_URL}/agent/${agentEndpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dilemmaData),
@@ -60,7 +73,8 @@ function App() {
   const handleContinue = async () => {
     setRoundCount(roundCount + 1);
     
-    const agents = ['Deon', 'Conse', 'Virtue'];
+    // Get unique agent names from the current transcript
+    const agents = [...new Set(transcript.turns.map(turn => turn.agent))];
     const currentTurns = [...transcript.turns];
 
     for (const agent of agents) {

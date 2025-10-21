@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AgentSelector from './AgentSelector';
 import './DilemmaForm.css';
 
 function DilemmaForm({ onSubmit }) {
@@ -8,6 +9,8 @@ function DilemmaForm({ onSubmit }) {
     B: '',
     constraints: '',
   });
+  
+  const [selectedAgents, setSelectedAgents] = useState(['deon', 'conse', 'virtue']); // Default selection
 
   const handleChange = (e) => {
     setFormData({
@@ -18,7 +21,12 @@ function DilemmaForm({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const validAgents = selectedAgents.filter(agent => agent !== null);
+    if (validAgents.length !== 3) {
+      alert('Please select exactly 3 agents for the debate.');
+      return;
+    }
+    onSubmit(formData, validAgents);
   };
 
   return (
@@ -77,8 +85,17 @@ function DilemmaForm({ onSubmit }) {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary">
-          Start Debate
+        <AgentSelector 
+          selectedAgents={selectedAgents}
+          onSelectionChange={setSelectedAgents}
+        />
+
+        <button 
+          type="submit" 
+          className={`btn btn-primary ${selectedAgents.filter(a => a !== null).length !== 3 ? 'disabled' : ''}`}
+          disabled={selectedAgents.filter(a => a !== null).length !== 3}
+        >
+          Start Debate with Selected Team
         </button>
       </form>
     </div>
