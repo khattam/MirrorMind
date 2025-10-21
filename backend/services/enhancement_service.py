@@ -271,11 +271,32 @@ class EnhancementService:
     
     def generate_system_prompt(self, enhanced_prompt: str, agent_name: str) -> str:
         """Convert enhanced prompt into final system prompt format"""
+        # Clean the enhanced prompt to remove any name changes
+        cleaned_prompt = self._preserve_agent_name(enhanced_prompt, agent_name)
+        
         # Format the enhanced prompt as a proper system prompt
         system_prompt = (
-            f"You are {agent_name}, an ethical agent. {enhanced_prompt} "
+            f"You are {agent_name}, an ethical agent. {cleaned_prompt} "
             f"When responding to opponents, ALWAYS start with their name followed by a comma. "
             f"Respond in compact JSON only."
         )
         
         return system_prompt
+    
+    def _preserve_agent_name(self, enhanced_prompt: str, original_name: str) -> str:
+        """Remove any name changes from the enhanced prompt"""
+        import re
+        
+        # Remove JSON-style name fields that might change the agent name
+        patterns_to_remove = [
+            r'"name"\s*:\s*"[^"]*"',
+            r'"agentName"\s*:\s*"[^"]*"',
+            r'"agent_name"\s*:\s*"[^"]*"',
+            r'"Agent Name"\s*:\s*"[^"]*"'
+        ]
+        
+        cleaned = enhanced_prompt
+        for pattern in patterns_to_remove:
+            cleaned = re.sub(pattern, f'"name": "{original_name}"', cleaned, flags=re.IGNORECASE)
+        
+        return cleaned

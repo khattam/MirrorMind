@@ -35,6 +35,36 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
     }
   }, [stage]);
 
+  // Handle agent deletion
+  const handleDeleteAgent = async (agentId, agentName) => {
+    if (!confirm(`Are you sure you want to delete "${agentName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/agents/${agentId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        // Remove from local state
+        setCustomAgents(prev => prev.filter(agent => agent.id !== agentId));
+        // Also remove from expanded state
+        setExpandedAgents(prev => {
+          const newExpanded = new Set(prev);
+          newExpanded.delete(agentId);
+          return newExpanded;
+        });
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to delete agent: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete agent. Please try again.');
+    }
+  };
+
   const agentInfo = {
     Deon: {
       name: 'Deon',
@@ -179,21 +209,50 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
               <div className="agents-subsection">
                 <h3 className="subsection-title">Custom Agents</h3>
                 {customAgents.map((agent) => (
-                  <div key={agent.id} className="agent-info-card custom">
-                    <div className="agent-info-header">
-                      <div className="agent-info-avatar custom">
+                  <div key={agent.id} className="agent-info-card custom-agent">
+                    <button 
+                      className="delete-agent-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAgent(agent.id, agent.name);
+                      }}
+                      title="Delete Agent"
+                    >
+                      ×
+                    </button>
+                    <div 
+                      className="agent-info-header clickable"
+                      onClick={() => {
+                        const newExpanded = new Set(expandedAgents);
+                        if (newExpanded.has(agent.id)) {
+                          newExpanded.delete(agent.id);
+                        } else {
+                          newExpanded.add(agent.id);
+                        }
+                        setExpandedAgents(newExpanded);
+                      }}
+                    >
+                      <div className="agent-info-avatar" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                         <span className="agent-info-icon">{agent.avatar}</span>
                       </div>
                       <div className="agent-header-text">
                         <h4 className="agent-info-name">{agent.name}</h4>
                         <p className="agent-info-role">Custom Agent</p>
-                        {agent.average_rating > 0 && (
-                          <div className="agent-rating">
-                            ⭐ {agent.average_rating.toFixed(1)} ({agent.rating_count})
-                          </div>
-                        )}
                       </div>
+                      <span className="expand-icon">{expandedAgents.has(agent.id) ? '−' : '+'}</span>
                     </div>
+                    
+                    {expandedAgents.has(agent.id) && (
+                      <div className="agent-info-details">
+                        <p className="agent-info-description">{agent.description}</p>
+                        <div className="agent-info-philosophy">
+                          <strong>Core Belief:</strong> {agent.enhanced_prompt ? 
+                            agent.enhanced_prompt.substring(0, 150) + '...' : 
+                            'Personalized ethical reasoning based on user-defined values and principles.'
+                          }
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

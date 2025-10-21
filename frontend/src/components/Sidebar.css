@@ -1,5 +1,5 @@
 .sidebar {
-  width: 260px;
+  width: 320px;
   background: #171717;
   border-right: 1px solid #2a2a2a;
   display: flex;
@@ -340,18 +340,51 @@ ilder Section */
   padding: 0 16px;
 }
 
-.agent-info-card.custom {
-  border-left: 3px solid #667eea;
-}
 
-.agent-info-avatar.custom {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
 
 .agent-rating {
   font-size: 11px;
   color: #ffd700;
   margin-top: 2px;
+}
+
+/* Custom Agent with Delete Button */
+.custom-agent {
+  position: relative;
+}
+
+.delete-agent-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 50%;
+  color: #ccc;
+  transition: all 0.2s ease;
+  line-height: 1;
+  opacity: 0;
+  z-index: 10;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Show delete button on card hover */
+.custom-agent:hover .delete-agent-btn {
+  opacity: 1;
+}
+
+.delete-agent-btn:hover {
+  background: #ff6b6b;
+  color: white;
+  transform: scale(1.1);
 }
 
 /* Responsive */

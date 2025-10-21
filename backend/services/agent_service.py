@@ -51,6 +51,9 @@ class AgentService:
 
     def create_agent(self, request: AgentCreationRequest, enhanced_prompt: str, system_prompt: str) -> CustomAgent:
         """Create a new custom agent"""
+        # Check for duplicate names (including default agents)
+        self._check_duplicate_name(request.name)
+        
         agent = CustomAgent(
             name=request.name,
             avatar=request.avatar,
@@ -62,16 +65,26 @@ class AgentService:
         # Load existing agents
         agents = self._load_agents()
         
-        # Check for duplicate names
-        for existing_agent in agents.values():
-            if existing_agent.get('name', '').lower() == agent.name.lower():
-                raise ValueError(f"Agent with name '{agent.name}' already exists")
-        
         # Save agent
         agents[agent.id] = agent.dict()
         self._save_agents(agents)
         
         return agent
+    
+    def _check_duplicate_name(self, name: str) -> None:
+        """Check if agent name already exists (custom or default)"""
+        name_lower = name.lower().strip()
+        
+        # Check against default agents
+        default_names = ["deon", "conse", "virtue"]
+        if name_lower in default_names:
+            raise ValueError(f"Agent name '{name}' conflicts with a default agent. Please choose a different name.")
+        
+        # Check against existing custom agents
+        agents = self._load_agents()
+        for existing_agent in agents.values():
+            if existing_agent.get('name', '').lower().strip() == name_lower:
+                raise ValueError(f"Agent with name '{name}' already exists. Please choose a different name.")
 
     def get_agent(self, agent_id: str) -> Optional[CustomAgent]:
         """Get a specific agent by ID"""
