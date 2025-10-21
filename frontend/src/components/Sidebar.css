@@ -387,6 +387,23 @@ ilder Section */
   transform: scale(1.1);
 }
 
+/* Custom Agent Meta Information */
+.custom-agent-meta {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.meta-item {
+  font-size: 0.8rem;
+  color: #808080;
+  margin-bottom: 4px;
+}
+
+.meta-item strong {
+  color: #b0b0b0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {

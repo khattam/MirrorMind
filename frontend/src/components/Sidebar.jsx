@@ -245,11 +245,18 @@ function Sidebar({ stage, debateHistory, onNewDebate, onViewHistory, onDeleteHis
                     {expandedAgents.has(agent.id) && (
                       <div className="agent-info-details">
                         <p className="agent-info-description">{agent.description}</p>
-                        <div className="agent-info-philosophy">
-                          <strong>Core Belief:</strong> {agent.enhanced_prompt ? 
-                            agent.enhanced_prompt.substring(0, 150) + '...' : 
-                            'Personalized ethical reasoning based on user-defined values and principles.'
-                          }
+                        <div className="custom-agent-meta">
+                          <div className="meta-item">
+                            <strong>Created:</strong> {new Date(agent.created_at).toLocaleDateString()}
+                          </div>
+                          <div className="meta-item">
+                            <strong>Usage:</strong> {agent.usage_count} debates
+                          </div>
+                          {agent.average_rating > 0 && (
+                            <div className="meta-item">
+                              <strong>Rating:</strong> ⭐ {agent.average_rating.toFixed(1)} ({agent.rating_count} reviews)
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
