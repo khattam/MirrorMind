@@ -110,6 +110,10 @@
 .step-indicator {
   text-align: center;
   margin-bottom: 32px;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }
 
 .step-text {
