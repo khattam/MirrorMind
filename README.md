@@ -6,16 +6,20 @@ It's an experiment in *AI ethics, philosophy, and reasoning*, built to make comp
 
 ---
 
-## 🌟 What's New: Custom Agent Builder
+## 🌟 What's New: Custom Agent Builder with AI Enhancement
 
-Create your own ethical AI agents with our intuitive 4-step wizard:
+Create your own ethical AI agents with our intuitive 4-step wizard powered by GPT-4o:
 
-1. **Basic Info** - Name your agent and choose an avatar
-2. **Personality** - Describe their beliefs and values in natural language  
-3. **AI Enhancement** - Watch as AI analyzes and improves your description
-4. **Preview** - Test your agent before adding it to debates
+1. **Basic Info** - Name your agent and choose from 32 emoji avatars across 4 categories
+2. **Personality** - Describe their beliefs and values in natural language (50-1000 chars)
+3. **AI Enhancement** - GPT-4o analyzes and improves your description with quality scoring
+4. **Preview** - Review side-by-side comparison and create your agent
 
-**Example:** Transform "This bot cares about animals" into a sophisticated agent with clear reasoning frameworks, decision criteria, and personality traits.
+**Real Example:**
+- **Input:** "This agent is a doctor who believes in patient autonomy above all else."
+- **Output:** "Dr. Maya Chen is a bioethicist who champions patient autonomy as the cornerstone of medical ethics. She applies a framework rooted in informed consent and bodily autonomy, citing landmark cases like Cruzan v. Director..."
+
+**Quality Metrics:** Clarity, Specificity, Consistency, Depth (scored 0-10)
 
 ---
 
@@ -48,9 +52,11 @@ Create unlimited personalized agents representing any ethical framework:
 
 ### 🛠️ **Custom Agent Builder**
 - **Natural Language Input:** Describe agents in plain English (50-1000 characters)
-- **AI-Powered Enhancement:** Automatic analysis and improvement of descriptions
-- **Quality Scoring:** Real-time feedback on clarity, completeness, and consistency
-- **Professional UI:** Full-screen wizard with smooth animations and progress tracking
+- **GPT-4o Enhancement:** Recursive improvement with structured output for consistency
+- **Quality Scoring:** Four-dimensional analysis (clarity, specificity, consistency, depth)
+- **Transparency:** See exactly what improvements were made and why
+- **Professional UI:** Full-screen wizard with purple gradient theme and glass morphism
+- **Persistent Storage:** JSON-based agent library with full CRUD operations
 
 ### 🎨 **Modern User Experience**
 - **Responsive Design:** Optimized for desktop, tablet, and mobile
@@ -83,10 +89,11 @@ Create unlimited personalized agents representing any ethical framework:
 ## 🏗️ Architecture
 
 ### 🔧 **Backend - FastAPI (Python)**
-- **Agent Management:** CRUD operations for custom agents with JSON storage
-- **Enhancement Engine:** AI-powered prompt analysis and improvement using Ollama
-- **Debate Orchestration:** Structured API endpoints with error handling and validation
-- **Flexible AI Integration:** Support for local Ollama and cloud models
+- **Agent Management:** Full CRUD operations with `AgentService` and JSON persistence
+- **Enhancement Engine:** Two-stage AI pipeline with `PromptAnalyzer` and `PromptEnhancer`
+- **GPT-4o Integration:** Structured output format ensures reliable JSON responses
+- **Debate Orchestration:** RESTful API endpoints with Pydantic validation
+- **Modular Architecture:** Clean separation between services, models, and routes
 
 ### 💻 **Frontend - React + Vite**
 - **Modern React:** Functional components with hooks and context
@@ -94,11 +101,12 @@ Create unlimited personalized agents representing any ethical framework:
 - **State Management:** Clean separation of concerns with proper data flow
 - **Professional Design:** Consistent design system with smooth animations
 
-### 🤖 **AI Integration - Ollama**
-- **Local Models:** Currently using Qwen 2.5 7B for reliable local inference
-- **Cloud Ready:** Infrastructure for Ollama cloud API integration
-- **Structured Prompts:** Consistent agent personas with debate-specific formatting
-- **Quality Assurance:** Multiple validation layers and fallback mechanisms
+### 🤖 **AI Integration**
+- **Debate Engine:** Ollama with Qwen 2.5 7B for local agent responses
+- **Enhancement Engine:** OpenAI GPT-4o for intelligent prompt improvement
+- **Structured Output:** JSON schema validation ensures consistent responses
+- **Recursive Improvement:** Analysis scores guide targeted enhancements
+- **Quality Assurance:** Multiple validation layers and error handling
 
 ---
 
@@ -106,9 +114,10 @@ Create unlimited personalized agents representing any ethical framework:
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Frontend** | React, Vite, Modern CSS | Interactive UI with smooth animations |
+| **Frontend** | React, Vite, Modern CSS | Interactive UI with purple gradient theme |
 | **Backend** | FastAPI, Python, Pydantic | RESTful API with data validation |
-| **AI Engine** | Ollama, Qwen 2.5 7B | Local AI inference and enhancement |
+| **Debate AI** | Ollama, Qwen 2.5 7B | Local AI inference for debates |
+| **Enhancement AI** | OpenAI GPT-4o | Cloud-based prompt improvement |
 | **Storage** | JSON Files | Agent data and debate history |
 | **Deployment** | Local Development | Ready for cloud deployment |
 
@@ -120,6 +129,7 @@ Create unlimited personalized agents representing any ethical framework:
 - Python 3.8+
 - Node.js 16+
 - Ollama installed locally
+- OpenAI API key (for custom agent enhancement)
 
 ### Installation
 
@@ -135,6 +145,9 @@ Create unlimited personalized agents representing any ethical framework:
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    pip install -r requirements.txt
+   
+   # Create .env file with your OpenAI API key
+   echo "OPENAI_API_KEY=your_api_key_here" > .env
    ```
 
 3. **Setup Frontend**
@@ -190,8 +203,11 @@ Create unlimited personalized agents representing any ethical framework:
 
 ## 🎯 Roadmap
 
-### 🔄 **Phase 1: Core Enhancements**
-- [ ] Agent selection for debates (mix default + custom agents)
+### 🔄 **Phase 1: Core Enhancements** (In Progress)
+- [x] Custom agent builder with AI enhancement
+- [x] Quality scoring and analysis system
+- [x] Agent library with CRUD operations
+- [ ] Custom agents participating in live debates
 - [ ] Community rating system for custom agents
 - [ ] Agent performance analytics and metrics
 - [ ] Export debates as formatted reports
@@ -213,6 +229,57 @@ Create unlimited personalized agents representing any ethical framework:
 - [ ] Agent learning and evolution from debates
 - [ ] Specialized domain agents (Legal, Medical, Business)
 - [ ] Advanced argument analysis and logical fallacy detection
+
+---
+
+## 📊 Technical Deep Dive
+
+### Custom Agent Enhancement Pipeline
+
+```
+User Input → Frontend Validation → POST /api/enhance
+    ↓
+PromptAnalyzer.analyze()
+    ├─ Clarity Score (0-10)
+    ├─ Specificity Score (0-10)
+    ├─ Consistency Score (0-10)
+    └─ Depth Score (0-10)
+    ↓
+PromptEnhancer.enhance(description, scores)
+    ├─ Build context-aware prompt
+    ├─ Call GPT-4o with structured output
+    └─ Parse improvements list
+    ↓
+Return {enhanced_prompt, scores, improvements}
+    ↓
+User Reviews → POST /api/agents/create
+    ↓
+AgentService.create() → JSON Storage
+```
+
+### Key Design Decisions
+
+**Separation of Concerns:**
+- `PromptAnalyzer`: Scores quality dimensions independently
+- `PromptEnhancer`: Focuses on improvement based on scores
+- `AgentService`: Handles persistence and CRUD operations
+
+**Structured Output:**
+- GPT-4o's JSON schema ensures consistent response format
+- Eliminates parsing errors and validation issues
+- Enables reliable frontend rendering
+
+**Recursive Improvement:**
+- Analyzer identifies weak areas (score < 8/10)
+- Enhancer targets those specific dimensions
+- Creates measurable quality improvements
+
+**Transparency:**
+- Users see original vs enhanced side-by-side
+- Explicit list of improvements made
+- Quality scores provide objective feedback
+
+For detailed architecture diagrams, see [`docs/agent-builder-architecture.md`](docs/agent-builder-architecture.md)
 
 ---
 
